@@ -76,7 +76,7 @@ void Controller::receive(std::unique_ptr<Event> e)
         newHead.ttl = currentHead.ttl;
 
         bool lost = false;
-
+        //check if snake have a collision with wall ?
         for (auto segment : m_segments) {
             if (segment.x == newHead.x and segment.y == newHead.y) {
                 m_scorePort.send(std::make_unique<EventT<LooseInd>>());
@@ -84,7 +84,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                 break;
             }
         }
-
+        //if lost from prev for loop is true is not going to enter
         if (not lost) {
             if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
                 m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
@@ -107,7 +107,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                 }
             }
         }
-
+        //if lost from prev for loop is true is not going to enter
         if (not lost) {
             m_segments.push_front(newHead);
             DisplayInd placeNewHead;
