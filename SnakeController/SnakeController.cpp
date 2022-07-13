@@ -90,6 +90,19 @@ bool Controller::checkOutOfBounds(Segment &newHead) {
     return false;
 }
 
+void Controller::moveSnake() {
+    for (auto &segment : m_segments) {
+        if (not --segment.ttl) {
+            DisplayInd l_evt;
+            l_evt.x = segment.x;
+            l_evt.y = segment.y;
+            l_evt.value = Cell_FREE;
+
+            m_displayPort.send(std::make_unique<EventT<DisplayInd>>(l_evt));
+        }
+    }
+}
+
 void Controller::receive(std::unique_ptr<Event> e)
 {
     try {
@@ -110,16 +123,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                 m_scorePort.send(std::make_unique<EventT<LooseInd>>());
                 lost = true;
             } else {
-                for (auto &segment : m_segments) {
-                    if (not --segment.ttl) {
-                        DisplayInd l_evt;
-                        l_evt.x = segment.x;
-                        l_evt.y = segment.y;
-                        l_evt.value = Cell_FREE;
-
-                        m_displayPort.send(std::make_unique<EventT<DisplayInd>>(l_evt));
-                    }
-                }
+                moveSnake();
             }
         }
 
