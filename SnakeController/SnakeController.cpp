@@ -192,12 +192,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                     auto requestedFood = *dynamic_cast<EventT<FoodResp> const&>(*e);
 
                     bool requestedFoodCollidedWithSnake {colidedWithFood(requestedFood)};
-//                    for (auto const& segment : m_segments) {
-//                        if (segment.x == requestedFood.x and segment.y == requestedFood.y) {
-//                            requestedFoodCollidedWithSnake = true;
-//                            break;
-//                        }
-//                    }
+
 
                     if (requestedFoodCollidedWithSnake) {
                         m_foodPort.send(std::make_unique<EventT<FoodReq>>());
