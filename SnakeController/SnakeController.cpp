@@ -90,7 +90,7 @@ bool Controller::checkOutOfBounds(Segment &newHead) {
     return false;
 }
 
-void Controller::moveSnake() {
+void Controller::deleteOldSnake() {
     for (auto &segment : m_segments) {
         if (not --segment.ttl) {
             DisplayInd l_evt;
@@ -123,7 +123,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                 m_scorePort.send(std::make_unique<EventT<LooseInd>>());
                 lost = true;
             } else {
-                moveSnake();
+                deleteOldSnake();
             }
         }
 
