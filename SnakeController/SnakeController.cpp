@@ -63,17 +63,20 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
     }
 }
 
+void Controller::setNewHeadPosition(Segment &newHead) {
+    Segment const& currentHead = m_segments.front();
+    newHead.x = currentHead.x + ((m_currentDirection & Direction_LEFT) ? (m_currentDirection & Direction_DOWN) ? 1 : -1 : 0);
+    newHead.y = currentHead.y + (not (m_currentDirection & Direction_LEFT) ? (m_currentDirection & Direction_DOWN) ? 1 : -1 : 0);
+    newHead.ttl = currentHead.ttl;
+}
 void Controller::receive(std::unique_ptr<Event> e)
 {
     try {
         auto const& timerEvent = *dynamic_cast<EventT<TimeoutInd> const&>(*e);
 
-        Segment const& currentHead = m_segments.front();
-
+//        Segment const& currentHead = m_segments.front();
         Segment newHead;
-        newHead.x = currentHead.x + ((m_currentDirection & Direction_LEFT) ? (m_currentDirection & Direction_DOWN) ? 1 : -1 : 0);
-        newHead.y = currentHead.y + (not (m_currentDirection & Direction_LEFT) ? (m_currentDirection & Direction_DOWN) ? 1 : -1 : 0);
-        newHead.ttl = currentHead.ttl;
+        setNewHeadPosition(newHead);
 
         bool lost = false;
 
