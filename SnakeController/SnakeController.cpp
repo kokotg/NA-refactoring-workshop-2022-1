@@ -93,7 +93,7 @@ bool Controller::checkOutOfBounds(Segment &newHead) {
 void Controller::receive(std::unique_ptr<Event> e)
 {
     try {
-        auto const& timerEvent = *dynamic_cast<EventT<TimeoutInd> const&>(*e);
+        *dynamic_cast<EventT<TimeoutInd> const&>(*e);
 
         Segment newHead{};
         setNewHeadPosition(newHead);
