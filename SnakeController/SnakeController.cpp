@@ -66,7 +66,7 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
 void Controller::receive(std::unique_ptr<Event> e)
 {
     try {
-        auto const& timerEvent = *dynamic_cast<EventT<TimeoutInd> const&>(*e);
+       *dynamic_cast<EventT<TimeoutInd> const&>(*e);
 
         Segment const& currentHead = m_segments.front();
 
@@ -85,7 +85,7 @@ void Controller::receive(std::unique_ptr<Event> e)
             }
         }
 
-        if (not lost) {
+        if (!lost) {
             if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
                 m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
                 m_foodPort.send(std::make_unique<EventT<FoodReq>>());
@@ -173,9 +173,8 @@ void Controller::receive(std::unique_ptr<Event> e)
                         }
                     }
 
-                    if (requestedFoodCollidedWithSnake) {
-                        m_foodPort.send(std::make_unique<EventT<FoodReq>>());
-                    } else {
+                    if (requestedFoodCollidedWithSnake) m_foodPort.send(std::make_unique<EventT<FoodReq>>());
+                     else {
                         DisplayInd placeNewFood;
                         placeNewFood.x = requestedFood.x;
                         placeNewFood.y = requestedFood.y;
@@ -191,5 +190,11 @@ void Controller::receive(std::unique_ptr<Event> e)
         }
     }
 }
+
+// void 
+// if ((m_currentDirection & 0b01) != (direction & 0b01)) {
+//                 m_currentDirection = direction;
+//             }
+
 
 } // namespace Snake
