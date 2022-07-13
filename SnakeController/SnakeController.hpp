@@ -55,6 +55,7 @@ private:
     bool checkOutOfBounds(Segment& newHead);
     void deleteOldSnake();
     void moveSnake(Segment& newHead);
+    bool colidedWithFood(const FoodInd& receivedFood);
 };
 
 } // namespace Snake
