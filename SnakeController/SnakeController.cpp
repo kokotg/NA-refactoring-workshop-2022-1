@@ -157,16 +157,16 @@ void Controller::receive(std::unique_ptr<Event> e)
 
     } catch (std::bad_cast&) {
         try {
-            auto direction = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
+//            auto direction = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
 
-            if ((m_currentDirection & Direction_LEFT) != (direction & Direction_LEFT)) {
-                m_currentDirection = direction;
+            if ((m_currentDirection & Direction_LEFT) != (dynamic_cast<EventT<DirectionInd> const&>(*e)->direction & Direction_LEFT)) {
+                m_currentDirection = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
             }
         } catch (std::bad_cast&) {
             try {
                 auto receivedFood = *dynamic_cast<EventT<FoodInd> const&>(*e);
 
-                bool requestedFoodCollidedWithSnake = colidedWithFood(receivedFood);
+                bool requestedFoodCollidedWithSnake {colidedWithFood(receivedFood)};
 
 
                 if (requestedFoodCollidedWithSnake) {
@@ -200,7 +200,6 @@ void Controller::receive(std::unique_ptr<Event> e)
 
                         m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{requestedFood.x,requestedFood.y, Cell_FOOD}));
                     }
-
                     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
                 } catch (std::bad_cast&) {
                     throw UnexpectedEventException();
