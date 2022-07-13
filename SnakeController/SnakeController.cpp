@@ -53,8 +53,8 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
 
         while (length) {
             Segment seg;
-            istr >> seg.x >> seg.y;
             seg.ttl = length--;
+            istr >> seg.x >> seg.y;
             m_segments.push_back(seg);
         }
     } else {
@@ -162,7 +162,6 @@ void Controller::receive(std::unique_ptr<Event> e)
                 try {
                     auto requestedFood = *dynamic_cast<EventT<FoodResp> const&>(*e);
 
-                    bool requestedFoodCollidedWithSnake = false;
                     for (auto const& segment : m_segments) {
                         if (segment.x == requestedFood.x and segment.y == requestedFood.y) {
                             m_foodPort.send(std::make_unique<EventT<FoodReq>>());
