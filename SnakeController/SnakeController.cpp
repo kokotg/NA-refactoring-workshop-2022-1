@@ -78,12 +78,15 @@ bool Controller::checkIfLost(Segment& newHead) {
             return true;
         }
     }
+    return false;
+}
+
+bool Controller::checkOutOfBounds(Segment &newHead) {
     if(newHead.x < 0 or newHead.y < 0 or newHead.x >= m_mapDimension.first or newHead.y >= m_mapDimension.second)
     {
-        m_scorePort.send(std::make_unique<EventT<LooseInd>>());
+//        m_scorePort.send(std::make_unique<EventT<LooseInd>>());
         return true;
     }
-
     return false;
 }
 
@@ -103,9 +106,7 @@ void Controller::receive(std::unique_ptr<Event> e)
             if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
                 m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
                 m_foodPort.send(std::make_unique<EventT<FoodReq>>());
-            } else if (newHead.x < 0 or newHead.y < 0 or
-                       newHead.x >= m_mapDimension.first or
-                       newHead.y >= m_mapDimension.second) {
+            } else if (checkOutOfBounds(newHead)) {
                 m_scorePort.send(std::make_unique<EventT<LooseInd>>());
                 lost = true;
             } else {

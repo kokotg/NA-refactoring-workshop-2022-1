@@ -52,6 +52,7 @@ private:
 
     void setNewHeadPosition(Segment& newHead);
     bool checkIfLost(Segment& newHead);
+    bool checkOutOfBounds(Segment& newHead);
 };
 
 } // namespace Snake
