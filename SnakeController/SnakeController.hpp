@@ -54,6 +54,7 @@ private:
     bool checkIfLost(Segment& newHead);
     bool checkOutOfBounds(Segment& newHead);
     void deleteOldSnake();
+    void moveSnake(Segment& newHead);
 };
 
 } // namespace Snake
