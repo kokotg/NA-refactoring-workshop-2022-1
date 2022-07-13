@@ -69,24 +69,35 @@ void Controller::setNewHeadPosition(Segment &newHead) {
     newHead.y = currentHead.y + (not (m_currentDirection & Direction_LEFT) ? (m_currentDirection & Direction_DOWN) ? 1 : -1 : 0);
     newHead.ttl = currentHead.ttl;
 }
+
+bool Controller::checkIfLost(Segment& newHead) {
+
+    for (auto segment : m_segments) {
+        if (segment.x == newHead.x and segment.y == newHead.y) {
+            m_scorePort.send(std::make_unique<EventT<LooseInd>>());
+            return true;
+        }
+    }
+    if(newHead.x < 0 or newHead.y < 0 or newHead.x >= m_mapDimension.first or newHead.y >= m_mapDimension.second)
+    {
+        m_scorePort.send(std::make_unique<EventT<LooseInd>>());
+        return true;
+    }
+
+    return false;
+}
+
 void Controller::receive(std::unique_ptr<Event> e)
 {
     try {
         auto const& timerEvent = *dynamic_cast<EventT<TimeoutInd> const&>(*e);
 
-//        Segment const& currentHead = m_segments.front();
-        Segment newHead;
+        Segment newHead{};
         setNewHeadPosition(newHead);
 
         bool lost = false;
 
-        for (auto segment : m_segments) {
-            if (segment.x == newHead.x and segment.y == newHead.y) {
-                m_scorePort.send(std::make_unique<EventT<LooseInd>>());
-                lost = true;
-                break;
-            }
-        }
+        lost = checkIfLost(newHead);
 
         if (not lost) {
             if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
