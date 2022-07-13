@@ -5,6 +5,7 @@
 
 #include "EventT.hpp"
 #include "IPort.hpp"
+#include <iostream>
 
 namespace Snake
 {
@@ -66,17 +67,20 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
 void Controller::receive(std::unique_ptr<Event> e)
 {
     try {
-        auto const& timerEvent = *dynamic_cast<EventT<TimeoutInd> const&>(*e);
+        *dynamic_cast<EventT<TimeoutInd> const&>(*e);
 
         Segment const& currentHead = m_segments.front();
 
         Segment newHead;
+        //check if ? have some simpler method
+        //first one Direction_LEFT  = 0b01, Direction_DOWN  = 0b10,
+ 
         newHead.x = currentHead.x + ((m_currentDirection & 0b01) ? (m_currentDirection & 0b10) ? 1 : -1 : 0);
         newHead.y = currentHead.y + (not (m_currentDirection & 0b01) ? (m_currentDirection & 0b10) ? 1 : -1 : 0);
         newHead.ttl = currentHead.ttl;
 
         bool lost = false;
-        //check if snake have a collision with wall ?
+        //check if snake collide with himself
         for (auto segment : m_segments) {
             if (segment.x == newHead.x and segment.y == newHead.y) {
                 m_scorePort.send(std::make_unique<EventT<LooseInd>>());
@@ -84,17 +88,24 @@ void Controller::receive(std::unique_ptr<Event> e)
                 break;
             }
         }
+        //check if snake have collision with wall
+        if (newHead.x < 0 or newHead.y < 0 or
+                 newHead.x >= m_mapDimension.first or
+                 newHead.y >= m_mapDimension.second)
+        {
+            m_scorePort.send(std::make_unique<EventT<LooseInd>>());
+            lost = true;
+        }
+
         //if lost from prev for loop is true is not going to enter
         if (not lost) {
+            //check if snake hit food and send events
             if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
                 m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
                 m_foodPort.send(std::make_unique<EventT<FoodReq>>());
-            } else if (newHead.x < 0 or newHead.y < 0 or
-                       newHead.x >= m_mapDimension.first or
-                       newHead.y >= m_mapDimension.second) {
-                m_scorePort.send(std::make_unique<EventT<LooseInd>>());
-                lost = true;
+            // if not new food and no wall collision send snake to display
             } else {
+                //check for last segment and free it
                 for (auto &segment : m_segments) {
                     if (not --segment.ttl) {
                         DisplayInd l_evt;
@@ -106,9 +117,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                     }
                 }
             }
-        }
-        //if lost from prev for loop is true is not going to enter
-        if (not lost) {
+
             m_segments.push_front(newHead);
             DisplayInd placeNewHead;
             placeNewHead.x = newHead.x;
@@ -124,25 +133,27 @@ void Controller::receive(std::unique_ptr<Event> e)
                     [](auto const& segment){ return not (segment.ttl > 0); }),
                 m_segments.end());
         }
+
     } catch (std::bad_cast&) {
         try {
             auto direction = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
-
+            // check
             if ((m_currentDirection & 0b01) != (direction & 0b01)) {
                 m_currentDirection = direction;
-            }
+            } 
         } catch (std::bad_cast&) {
             try {
                 auto receivedFood = *dynamic_cast<EventT<FoodInd> const&>(*e);
 
                 bool requestedFoodCollidedWithSnake = false;
                 for (auto const& segment : m_segments) {
+                    //check
                     if (segment.x == receivedFood.x and segment.y == receivedFood.y) {
                         requestedFoodCollidedWithSnake = true;
                         break;
                     }
                 }
-
+                //check
                 if (requestedFoodCollidedWithSnake) {
                     m_foodPort.send(std::make_unique<EventT<FoodReq>>());
                 } else {
@@ -167,12 +178,13 @@ void Controller::receive(std::unique_ptr<Event> e)
 
                     bool requestedFoodCollidedWithSnake = false;
                     for (auto const& segment : m_segments) {
+                        //check
                         if (segment.x == requestedFood.x and segment.y == requestedFood.y) {
                             requestedFoodCollidedWithSnake = true;
                             break;
                         }
                     }
-
+                    //check
                     if (requestedFoodCollidedWithSnake) {
                         m_foodPort.send(std::make_unique<EventT<FoodReq>>());
                     } else {
