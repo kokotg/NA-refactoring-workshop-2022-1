@@ -63,6 +63,19 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
     }
 }
 
+int Controller::NewXPosition()
+{
+    Segment const& currentHead = m_segments.front();
+    return currentHead.x + ((m_currentDirection & 0b01) ? (m_currentDirection & 0b10) ? 1 : -1 : 0);
+}
+
+int Controller::NewYPosition()
+{
+    Segment const& currentHead = m_segments.front();
+    return currentHead.y + (not (m_currentDirection & 0b01) ? (m_currentDirection & 0b10) ? 1 : -1 : 0);
+}
+
+
 void Controller::receive(std::unique_ptr<Event> e)
 {
     try {
@@ -71,15 +84,15 @@ void Controller::receive(std::unique_ptr<Event> e)
         Segment const& currentHead = m_segments.front();
 
         Segment newHead;
-        newHead.x = currentHead.x + ((m_currentDirection & 0b01) ? (m_currentDirection & 0b10) ? 1 : -1 : 0);
-        newHead.y = currentHead.y + (not (m_currentDirection & 0b01) ? (m_currentDirection & 0b10) ? 1 : -1 : 0);
+        newHead.x = NewXPosition();
+        newHead.y = NewYPosition();
         newHead.ttl = currentHead.ttl;
 
         bool lost = false;
 
-        for (auto segment : m_segments) {
-            if (segment.x == newHead.x and segment.y == newHead.y) {
-                m_scorePort.send(std::make_unique<EventT<LooseInd>>());
+        for (auto segment : m_segments) { // change names m_segments
+            if (segment.x == newHead.x and segment.y == newHead.y) { // are segments same position
+                m_scorePort.send(std::make_unique<EventT<LooseInd>>()); // send
                 lost = true;
                 break;
             }
