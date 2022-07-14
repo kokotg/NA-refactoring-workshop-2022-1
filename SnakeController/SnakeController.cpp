@@ -100,14 +100,10 @@ void Controller::deleteOldSnake() {
     }
 }
 
-void Controller::moveSnake(Segment& newHead){
+void Controller::moveSnake(const Segment& newHead){
         m_segments.push_front(newHead);
-        DisplayInd placeNewHead;
-        placeNewHead.x = newHead.x;
-        placeNewHead.y = newHead.y;
-        placeNewHead.value = Cell_SNAKE;
 
-        m_displayPort.send(std::make_unique<EventT<DisplayInd>>(placeNewHead));
+        m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{newHead.x, newHead.y, Cell_SNAKE}));
 
         m_segments.erase(
                 std::remove_if(
