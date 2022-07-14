@@ -168,10 +168,9 @@ void Controller::receive(std::unique_ptr<Event> e)
             }
         } catch (std::bad_cast&) {
             try {
-                bool requestedFoodCollidedWithSnake {colidedWithFood(castToTEvent<FoodInd>(e))};
 
 
-                if (requestedFoodCollidedWithSnake) {
+                if (colidedWithFood(castToTEvent<FoodInd>(e))) {
                     m_foodPort.send(std::make_unique<EventT<FoodReq>>());
                 } else {
 
