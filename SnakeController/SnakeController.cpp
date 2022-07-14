@@ -168,8 +168,7 @@ void Controller::receive(std::unique_ptr<Event> e)
             }
         } catch (std::bad_cast&) {
             try {
-                auto receivedFood = *dynamic_cast<EventT<FoodInd> const&>(*e);
-
+                auto receivedFood = castToTEvent<FoodInd>(e);
                 bool requestedFoodCollidedWithSnake {colidedWithFood(receivedFood)};
 
 
