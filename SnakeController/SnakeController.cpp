@@ -168,8 +168,7 @@ void Controller::receive(std::unique_ptr<Event> e)
             }
         } catch (std::bad_cast&) {
             try {
-                auto receivedFood = castToTEvent<FoodInd>(e);
-                bool requestedFoodCollidedWithSnake {colidedWithFood(receivedFood)};
+                bool requestedFoodCollidedWithSnake {colidedWithFood(castToTEvent<FoodInd>(e))};
 
 
                 if (requestedFoodCollidedWithSnake) {
@@ -178,10 +177,10 @@ void Controller::receive(std::unique_ptr<Event> e)
 
                     m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{m_foodPosition.first,m_foodPosition.second, Cell_FREE}));
 
-                    m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{receivedFood.x,receivedFood.y,Cell_FOOD}));
+                    m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{castToTEvent<FoodInd>(e).x,castToTEvent<FoodInd>(e).y,Cell_FOOD}));
                 }
 
-                m_foodPosition = std::make_pair(receivedFood.x, receivedFood.y);
+                m_foodPosition = std::make_pair(castToTEvent<FoodInd>(e).x, castToTEvent<FoodInd>(e).y);
 
             } catch (std::bad_cast&) {
                 try {
