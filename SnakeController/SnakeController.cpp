@@ -87,7 +87,6 @@ void Controller::receive(std::unique_ptr<Event> e)
         {
             m_scorePort.send(std::make_unique<EventT<LooseInd>>());
             lost = true;
-            return;
         }
 
         //check if snake collide with himself
@@ -139,7 +138,6 @@ void Controller::receive(std::unique_ptr<Event> e)
     
     catch (std::bad_cast&) {
         try {
-            //std::cout << "TRY_1" << "\n";
             auto direction = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
             // check
             if ((m_currentDirection & Direction_LEFT) != (direction & Direction_LEFT)) {
@@ -147,7 +145,6 @@ void Controller::receive(std::unique_ptr<Event> e)
             } 
         } catch (std::bad_cast&) {
             try {
-                //std::cout << "TRY_2" << "\n";
                 auto receivedFood = *dynamic_cast<EventT<FoodInd> const&>(*e);
 
                 
@@ -177,10 +174,9 @@ void Controller::receive(std::unique_ptr<Event> e)
 
             } catch (std::bad_cast&) {
                 try {
-                    //std::cout << "TRY_3" << "\n";
                     auto requestedFood = *dynamic_cast<EventT<FoodResp> const&>(*e);
 
-                    for (auto const& segment : m_segments) {
+                    for (auto const segment : m_segments) {
                         //check
                         if (segment.x == requestedFood.x and segment.y == requestedFood.y) {
                             m_foodPort.send(std::make_unique<EventT<FoodReq>>());
