@@ -140,9 +140,7 @@ void Controller::receive(std::unique_ptr<Event> e)
         Segment newHead{};
         setNewHeadPosition(newHead);
 
-        bool lost = false;
-
-        lost = checkIfLost(newHead);
+        bool lost {checkIfLost(newHead)};
 
         if (not lost) {
             if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
