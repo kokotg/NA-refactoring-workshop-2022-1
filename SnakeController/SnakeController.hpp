@@ -24,6 +24,15 @@ struct UnexpectedEventException : std::runtime_error
 
 class Controller : public IEventHandler
 {
+
+private:
+struct Segment
+{
+    int x;
+    int y;
+    int ttl;
+};
+
 public:
     Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config);
 
@@ -32,13 +41,24 @@ public:
 
     void receive(std::unique_ptr<Event> e) override;
 
+    void InitializeHead(Segment& newHead, Segment const& currentHead);
+    void DoSomething1(Segment& newHead);
+    void DoSomething2(Segment& newHead);
+    void clearOldFood();
+
+    template <typename T>
+    void placeNewFood(T receivedFood);
+    
+    template <typename T>
+    bool foodColidedWithSnake(T requestedFood);
+
+    void checkLostCondition(Segment& newHead);
+
+
+
+
 private:
-    struct Segment
-    {
-        int x;
-        int y;
-        int ttl;
-    };
+
 
     IPort& m_displayPort;
     IPort& m_foodPort;
