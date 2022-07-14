@@ -182,15 +182,13 @@ void Controller::receive(std::unique_ptr<Event> e)
 
             } catch (std::bad_cast&) {
                 try {
-                    auto requestedFood = *dynamic_cast<EventT<FoodResp> const&>(*e);
-
-                    if (colidedWithFood(requestedFood)) {
+                    if (colidedWithFood(castToTEvent<FoodResp>(e))) {
                         m_foodPort.send(std::make_unique<EventT<FoodReq>>());
                     } else {
 
                         m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{castToTEvent<FoodResp>(e).x,castToTEvent<FoodResp>(e).y, Cell_FOOD}));
                     }
-                    m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
+                    m_foodPosition = std::make_pair(castToTEvent<FoodResp>(e).x, castToTEvent<FoodResp>(e).y);
                 } catch (std::bad_cast&) {
                     throw UnexpectedEventException();
                 }
