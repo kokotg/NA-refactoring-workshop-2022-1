@@ -30,16 +30,18 @@ public:
     Controller(Controller const& p_rhs) = delete;
     Controller& operator=(Controller const& p_rhs) = delete;
 
+    
     void receive(std::unique_ptr<Event> e) override;
+    void checkFirst (bool lost, Segment struct);
+    //void checkSecond (std::list<Segment> m_segments);
 
-private:
     struct Segment
     {
         int x;
         int y;
         int ttl;
     };
-
+private:
     IPort& m_displayPort;
     IPort& m_foodPort;
     IPort& m_scorePort;
