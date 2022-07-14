@@ -159,7 +159,6 @@ void Controller::receive(std::unique_ptr<Event> e)
 
     } catch (std::bad_cast&) {
         try {
-
             if ((m_currentDirection & Direction_LEFT) != (dynamic_cast<EventT<DirectionInd> const&>(*e)->direction & Direction_LEFT)) {
                     m_currentDirection = castToTEvent<DirectionInd>(e).direction;
             }
@@ -190,5 +189,4 @@ void Controller::receive(std::unique_ptr<Event> e)
         }
     }
 }
-
 } // namespace Snake
