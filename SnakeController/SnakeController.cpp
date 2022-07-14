@@ -70,7 +70,7 @@ void Controller::setNewHeadPosition(Segment &newHead) {
     newHead.ttl = currentHead.ttl;
 }
 
-bool Controller::checkIfLost(Segment& newHead) {
+bool Controller::checkIfLost(const Segment& newHead) {
 
     for (auto segment : m_segments) {
         if (segment.x == newHead.x and segment.y == newHead.y) {
@@ -81,7 +81,7 @@ bool Controller::checkIfLost(Segment& newHead) {
     return false;
 }
 
-bool Controller::checkOutOfBounds(Segment &newHead) {
+bool Controller::checkOutOfBounds(const Segment &newHead) {
     if(newHead.x < 0 or newHead.y < 0 or newHead.x >= m_mapDimension.first or newHead.y >= m_mapDimension.second)
         return true;
     return false;

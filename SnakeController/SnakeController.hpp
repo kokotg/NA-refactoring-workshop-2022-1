@@ -51,14 +51,16 @@ private:
     std::list<Segment> m_segments;
 
     void setNewHeadPosition(Segment& newHead);
-    bool checkIfLost(Segment& newHead);
-    bool checkOutOfBounds(Segment& newHead);
+    bool checkIfLost(const Segment& newHead);
+    bool checkOutOfBounds(const Segment& newHead);
     void deleteOldSnake();
     void moveSnake(const Segment& newHead);
     template<typename T>
     bool colidedWithFood(const T& receivedFood);
     template<typename T>
     T castToTEvent(std::unique_ptr<Event>& e);
+
+    bool checkIfTouchedFoodOrLost(bool& lost, const Segment& newHead);
 };
 
 } // namespace Snake
