@@ -77,34 +77,11 @@ void Controller::receive(std::unique_ptr<Event> e)
 
         bool lost = false;
 
-        for (auto segment : m_segments) {
-            if (segment.x == newHead.x and segment.y == newHead.y) {
-                m_scorePort.send(std::make_unique<EventT<LooseInd>>());
-                lost = true;
-                break;
-            }
-        }
+        collisionCheck(newHead,lost); // loseCheck is also good name
+        snakeAdvance(newHead,lost);  //if not losst -advance
 
-        if (not lost) { //colisionCheck
-            collisionCheck(newHead,lost);
-        }
+        
 
-        if (not lost) {
-            m_segments.push_front(newHead);
-            DisplayInd placeNewHead;
-            placeNewHead.x = newHead.x;
-            placeNewHead.y = newHead.y;
-            placeNewHead.value = Cell_SNAKE;
-
-            m_displayPort.send(std::make_unique<EventT<DisplayInd>>(placeNewHead));
-
-            m_segments.erase(
-                std::remove_if(
-                    m_segments.begin(),
-                    m_segments.end(),
-                    [](auto const& segment){ return not (segment.ttl > 0); }),
-                m_segments.end());
-        }
     } catch (std::bad_cast&) {
         try {
             auto direction = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
@@ -174,7 +151,17 @@ void Controller::receive(std::unique_ptr<Event> e)
 }
 
 void Controller::collisionCheck(Snake::Controller::Segment& newHead, bool& lost){
-    if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
+
+       for (auto segment : m_segments) {
+            if (segment.x == newHead.x and segment.y == newHead.y) {
+                m_scorePort.send(std::make_unique<EventT<LooseInd>>());
+                lost = true;
+                break;
+            }
+        }
+
+    if (not lost) {
+        if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
                 m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
                 m_foodPort.send(std::make_unique<EventT<FoodReq>>());
             } else if (newHead.x < 0 or newHead.y < 0 or
@@ -194,7 +181,26 @@ void Controller::collisionCheck(Snake::Controller::Segment& newHead, bool& lost)
                     }
                 }
             }
+    } 
 }
 
+void Controller::snakeAdvance(Snake::Controller::Segment& newHead, bool& lost){
+    if (not lost) {
+        m_segments.push_front(newHead);
+            DisplayInd placeNewHead;
+            placeNewHead.x = newHead.x;
+            placeNewHead.y = newHead.y;
+            placeNewHead.value = Cell_SNAKE;
 
+            m_displayPort.send(std::make_unique<EventT<DisplayInd>>(placeNewHead));
+
+            m_segments.erase(
+                std::remove_if(
+                    m_segments.begin(),
+                    m_segments.end(),
+                    [](auto const& segment){ return not (segment.ttl > 0); }),
+                m_segments.end());
+        }
+    
+}
 } // namespace Snake
