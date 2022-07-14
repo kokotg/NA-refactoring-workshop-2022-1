@@ -188,7 +188,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                         m_foodPort.send(std::make_unique<EventT<FoodReq>>());
                     } else {
 
-                        m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{dynamic_cast<EventT<FoodResp> const&>(*e)->x,dynamic_cast<EventT<FoodResp> const&>(*e)->y, Cell_FOOD}));
+                        m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{castToTEvent<FoodResp>(e).x,castToTEvent<FoodResp>(e).y, Cell_FOOD}));
                     }
                     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
                 } catch (std::bad_cast&) {
