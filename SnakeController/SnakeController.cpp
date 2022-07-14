@@ -75,13 +75,9 @@ int Controller::NewYPosition()
     return currentHead.y + (not (m_currentDirection & 0b01) ? (m_currentDirection & 0b10) ? 1 : -1 : 0);
 }
 
-
-void Controller::receive(std::unique_ptr<Event> e)
+void Controller::TimeOutHandler()
 {
-    try {
-        auto const& timerEvent = *dynamic_cast<EventT<TimeoutInd> const&>(*e);
-
-        Segment const& currentHead = m_segments.front();
+Segment const& currentHead = m_segments.front();
 
         Segment newHead;
         newHead.x = NewXPosition();
@@ -137,18 +133,19 @@ void Controller::receive(std::unique_ptr<Event> e)
                     [](auto const& segment){ return not (segment.ttl > 0); }),
                 m_segments.end());
         }
-    } catch (std::bad_cast&) {
-        try {
-            auto direction = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
+}
 
-            if ((m_currentDirection & 0b01) != (direction & 0b01)) {
+
+void Controller::DirectionHandler(const Direction &direction)
+{
+    if ((m_currentDirection & 0b01) != (direction & 0b01)) {
                 m_currentDirection = direction;
             }
-        } catch (std::bad_cast&) {
-            try {
-                auto receivedFood = *dynamic_cast<EventT<FoodInd> const&>(*e);
+}
 
-                bool requestedFoodCollidedWithSnake = false;
+void Controller::FoodEncountHandler(const FoodInd &receivedFood)
+{
+        bool requestedFoodCollidedWithSnake = false;
                 for (auto const& segment : m_segments) {
                     if (segment.x == receivedFood.x and segment.y == receivedFood.y) {
                         requestedFoodCollidedWithSnake = true;
@@ -173,12 +170,11 @@ void Controller::receive(std::unique_ptr<Event> e)
                 }
 
                 m_foodPosition = std::make_pair(receivedFood.x, receivedFood.y);
+}
 
-            } catch (std::bad_cast&) {
-                try {
-                    auto requestedFood = *dynamic_cast<EventT<FoodResp> const&>(*e);
-
-                    bool requestedFoodCollidedWithSnake = false;
+void Controller::FoodRespawnHandler(const FoodResp &requestedFood)
+{
+            bool requestedFoodCollidedWithSnake = false;
                     for (auto const& segment : m_segments) {
                         if (segment.x == requestedFood.x and segment.y == requestedFood.y) {
                             requestedFoodCollidedWithSnake = true;
@@ -197,6 +193,28 @@ void Controller::receive(std::unique_ptr<Event> e)
                     }
 
                     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
+}
+
+void Controller::receive(std::unique_ptr<Event> e)
+{
+    try {
+        auto const& timerEvent = *dynamic_cast<EventT<TimeoutInd> const&>(*e);
+        TimeOutHandler();    
+    } catch (std::bad_cast&) {
+        try {
+            auto direction = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
+            DirectionHandler(direction);
+        } catch (std::bad_cast&) {
+            try {
+                auto receivedFood = *dynamic_cast<EventT<FoodInd> const&>(*e);
+
+                FoodEncountHandler(receivedFood);
+
+            } catch (std::bad_cast&) {
+                try {
+                    auto requestedFood = *dynamic_cast<EventT<FoodResp> const&>(*e);
+                    FoodRespawnHandler(requestedFood);
+                    
                 } catch (std::bad_cast&) {
                     throw UnexpectedEventException();
                 }

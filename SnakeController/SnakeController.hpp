@@ -52,6 +52,11 @@ private:
 
     int NewXPosition();
     int NewYPosition();
+
+    void TimeOutHandler();
+    void DirectionHandler(const Direction &direction);
+    void FoodEncountHandler(const FoodInd &receivedFood);
+    void FoodRespawnHandler(const FoodResp &requestedFood);
 };
 
 } // namespace Snake
