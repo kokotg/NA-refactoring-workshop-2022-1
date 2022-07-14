@@ -57,6 +57,8 @@ private:
     void moveSnake(Segment& newHead);
     template<typename T>
     bool colidedWithFood(const T& receivedFood);
+    template<typename T>
+    T castToTEvent(std::unique_ptr<Event>& e);
 };
 
 } // namespace Snake

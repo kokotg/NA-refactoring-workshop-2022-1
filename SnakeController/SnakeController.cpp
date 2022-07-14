@@ -126,7 +126,11 @@ bool Controller::colidedWithFood(const T& receivedFood) {
         if (segment.x == receivedFood.x and segment.y == receivedFood.y)
             return true;
     return false;
+}
 
+template<typename T>
+T Controller::castToTEvent(std::unique_ptr<Event>& e) {
+    return *dynamic_cast<EventT<T> const&>(*e);
 }
 void Controller::receive(std::unique_ptr<Event> e)
 {
@@ -157,10 +161,10 @@ void Controller::receive(std::unique_ptr<Event> e)
 
     } catch (std::bad_cast&) {
         try {
-//            auto direction = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
+            auto direction = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
 
             if ((m_currentDirection & Direction_LEFT) != (dynamic_cast<EventT<DirectionInd> const&>(*e)->direction & Direction_LEFT)) {
-                m_currentDirection = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
+                    m_currentDirection = castToTEvent<DirectionInd>(e).direction;
             }
         } catch (std::bad_cast&) {
             try {
@@ -172,11 +176,12 @@ void Controller::receive(std::unique_ptr<Event> e)
                 if (requestedFoodCollidedWithSnake) {
                     m_foodPort.send(std::make_unique<EventT<FoodReq>>());
                 } else {
-//                    DisplayInd clearOldFood;
-//                    clearOldFood.x = m_foodPosition.first;
-//                    clearOldFood.y = m_foodPosition.second;
-//                    clearOldFood.value = Cell_FREE;
-                    m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{m_foodPosition.first,m_foodPosition.second, Cell_FREE}));
+                    DisplayInd clearOldFood;
+                    clearOldFood.x = m_foodPosition.first;
+                    clearOldFood.y = m_foodPosition.second;
+                    clearOldFood.value = Cell_FREE;
+                    m_displayPort.send(std::make_unique<EventT<DisplayInd>>(clearOldFood));
+//                    m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{m_foodPosition.first,m_foodPosition.second, Cell_FREE}));
 
 //                    DisplayInd placeNewFood;
 //                    placeNewFood.x = receivedFood.x;
@@ -198,7 +203,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                         m_foodPort.send(std::make_unique<EventT<FoodReq>>());
                     } else {
 
-                        m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{requestedFood.x,requestedFood.y, Cell_FOOD}));
+                        m_displayPort.send(std::make_unique<EventT<DisplayInd>>(DisplayInd{dynamic_cast<EventT<FoodResp> const&>(*e)->x,dynamic_cast<EventT<FoodResp> const&>(*e)->y, Cell_FOOD}));
                     }
                     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
                 } catch (std::bad_cast&) {
