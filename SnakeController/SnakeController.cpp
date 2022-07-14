@@ -83,10 +83,7 @@ bool Controller::checkIfLost(Segment& newHead) {
 
 bool Controller::checkOutOfBounds(Segment &newHead) {
     if(newHead.x < 0 or newHead.y < 0 or newHead.x >= m_mapDimension.first or newHead.y >= m_mapDimension.second)
-    {
-//        m_scorePort.send(std::make_unique<EventT<LooseInd>>());
         return true;
-    }
     return false;
 }
 
