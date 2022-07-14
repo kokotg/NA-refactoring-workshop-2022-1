@@ -60,7 +60,7 @@ private:
     template<typename T>
     T castToTEvent(std::unique_ptr<Event>& e);
 
-    bool checkIfTouchedFoodOrLost(bool& lost, const Segment& newHead);
+    bool checkIfTouchedFoodOrLost(const Segment& newHead);
 };
 
 } // namespace Snake

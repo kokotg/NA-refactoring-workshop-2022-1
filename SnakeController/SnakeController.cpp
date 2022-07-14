@@ -119,6 +119,19 @@ template<typename T>
 T Controller::castToTEvent(std::unique_ptr<Event>& e) {
     return *dynamic_cast<EventT<T> const&>(*e);
 }
+
+bool Controller::checkIfTouchedFoodOrLost(const Segment &newHead) {
+    if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
+                m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
+                m_foodPort.send(std::make_unique<EventT<FoodReq>>());
+            } else if (checkOutOfBounds(newHead)) {
+                m_scorePort.send(std::make_unique<EventT<LooseInd>>());
+                return true;
+            } else {
+                deleteOldSnake();
+            }
+    return false;
+}
 void Controller::receive(std::unique_ptr<Event> e)
 {
     try {
@@ -129,17 +142,8 @@ void Controller::receive(std::unique_ptr<Event> e)
 
         bool lost {checkIfLost(newHead)};
 
-        if (not lost) {
-            if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
-                m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
-                m_foodPort.send(std::make_unique<EventT<FoodReq>>());
-            } else if (checkOutOfBounds(newHead)) {
-                m_scorePort.send(std::make_unique<EventT<LooseInd>>());
-                lost = true;
-            } else {
-                deleteOldSnake();
-            }
-        }
+        if (not lost)
+            lost = checkIfTouchedFoodOrLost(newHead);
 
         if (not lost)
            moveSnake(newHead);
