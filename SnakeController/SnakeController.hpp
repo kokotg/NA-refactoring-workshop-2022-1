@@ -39,6 +39,13 @@ private:
         int y;
         int ttl;
     };
+    bool lost = false;
+    bool requestedFoodCollidedWithSnake = false;
+
+    void loseCheck(Snake::Controller::Segment& newHead);
+    void snakeAdvance(Snake::Controller::Segment& newHead);
+    void receivedFoodCollisionCheck(Snake::FoodInd receivedFood);
+    void requestedFoodCollisionCheck(Snake::FoodResp requestedFood);
 
     IPort& m_displayPort;
     IPort& m_foodPort;
