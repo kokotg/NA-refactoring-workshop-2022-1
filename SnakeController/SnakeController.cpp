@@ -66,7 +66,7 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
 void Controller::receive(std::unique_ptr<Event> e)
 {
     try {
-        *dynamic_cast<EventT<TimeoutInd> const&>(*e); //auto const& timerEvent = 
+        *dynamic_cast<EventT<TimeoutInd> const&>(*e); 
 
         Segment const& currentHead = m_segments.front();
 
@@ -75,12 +75,8 @@ void Controller::receive(std::unique_ptr<Event> e)
         newHead.y = currentHead.y + (not (m_currentDirection & 0b01) ? (m_currentDirection & 0b10) ? 1 : -1 : 0);
         newHead.ttl = currentHead.ttl;
 
-        bool lost = false;
-
-        collisionCheck(newHead,lost); // loseCheck is also good name
-        snakeAdvance(newHead,lost);  //if not losst -advance
-
-        
+        loseCheck(newHead); 
+        snakeAdvance(newHead);  
 
     } catch (std::bad_cast&) {
         try {
@@ -150,7 +146,7 @@ void Controller::receive(std::unique_ptr<Event> e)
     }
 }
 
-void Controller::collisionCheck(Snake::Controller::Segment& newHead, bool& lost){
+void Controller::loseCheck(Snake::Controller::Segment& newHead){
 
        for (auto segment : m_segments) {
             if (segment.x == newHead.x and segment.y == newHead.y) {
@@ -184,7 +180,7 @@ void Controller::collisionCheck(Snake::Controller::Segment& newHead, bool& lost)
     } 
 }
 
-void Controller::snakeAdvance(Snake::Controller::Segment& newHead, bool& lost){
+void Controller::snakeAdvance(Snake::Controller::Segment& newHead){
     if (not lost) {
         m_segments.push_front(newHead);
             DisplayInd placeNewHead;
@@ -201,6 +197,6 @@ void Controller::snakeAdvance(Snake::Controller::Segment& newHead, bool& lost){
                     [](auto const& segment){ return not (segment.ttl > 0); }),
                 m_segments.end());
         }
-    
 }
+
 } // namespace Snake

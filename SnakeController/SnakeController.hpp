@@ -39,8 +39,10 @@ private:
         int y;
         int ttl;
     };
-    void collisionCheck(Snake::Controller::Segment& newHead, bool& lost);
-    void snakeAdvance(Snake::Controller::Segment& newHead, bool& lost);
+    bool lost = false;
+
+    void loseCheck(Snake::Controller::Segment& newHead);
+    void snakeAdvance(Snake::Controller::Segment& newHead);
 
     IPort& m_displayPort;
     IPort& m_foodPort;
