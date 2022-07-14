@@ -53,10 +53,15 @@ private:
     int NewXPosition();
     int NewYPosition();
 
-    void TimeOutHandler();
+    void TimeOutHandler(const TimeoutInd&);
     void DirectionHandler(const Direction &direction);
     void FoodEncountHandler(const FoodInd &receivedFood);
     void FoodRespawnHandler(const FoodResp &requestedFood);
+
+    bool IsOverTheMap(Segment &newHead);
+    bool SnakeHitsHimself(Segment &newHead);
+    void MoveSnake(Segment &newHead);
+    bool IsFoodFound(Segment &newHead);
 };
 
 } // namespace Snake
