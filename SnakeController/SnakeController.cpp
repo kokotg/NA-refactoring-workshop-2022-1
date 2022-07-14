@@ -114,7 +114,6 @@ void Controller::moveSnake(const Segment& newHead){
 };
 template<typename T>
 bool Controller::colidedWithFood(const T& receivedFood) {
-
     for (auto const& segment : m_segments)
         if (segment.x == receivedFood.x and segment.y == receivedFood.y)
             return true;
@@ -152,7 +151,7 @@ void Controller::receive(std::unique_ptr<Event> e)
 
     } catch (std::bad_cast&) {
         try {
-            if ((m_currentDirection & Direction_LEFT) != (dynamic_cast<EventT<DirectionInd> const&>(*e)->direction & Direction_LEFT)) {
+            if ((m_currentDirection & Direction_LEFT) != (castToTEvent<DirectionInd>(e).direction & Direction_LEFT)) {
                     m_currentDirection = castToTEvent<DirectionInd>(e).direction;
             }
         } catch (std::bad_cast&) {
