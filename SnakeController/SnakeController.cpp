@@ -53,9 +53,8 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
 
         while (length) {
             Segment seg;
-            istr >> seg.x >> seg.y;
             seg.ttl = length--;
-
+            istr >> seg.x >> seg.y;
             m_segments.push_back(seg);
         }
     } else {
@@ -106,9 +105,6 @@ void Controller::receive(std::unique_ptr<Event> e)
                     }
                 }
             }
-        }
-
-        if (not lost) {
             m_segments.push_front(newHead);
             DisplayInd placeNewHead;
             placeNewHead.x = newHead.x;
@@ -124,6 +120,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                     [](auto const& segment){ return not (segment.ttl > 0); }),
                 m_segments.end());
         }
+
     } catch (std::bad_cast&) {
         try {
             auto direction = dynamic_cast<EventT<DirectionInd> const&>(*e)->direction;
@@ -165,22 +162,17 @@ void Controller::receive(std::unique_ptr<Event> e)
                 try {
                     auto requestedFood = *dynamic_cast<EventT<FoodResp> const&>(*e);
 
-                    bool requestedFoodCollidedWithSnake = false;
                     for (auto const& segment : m_segments) {
                         if (segment.x == requestedFood.x and segment.y == requestedFood.y) {
-                            requestedFoodCollidedWithSnake = true;
-                            break;
+                            m_foodPort.send(std::make_unique<EventT<FoodReq>>());
+                        } else {
+                            DisplayInd placeNewFood;
+                            placeNewFood.x = requestedFood.x;
+                            placeNewFood.y = requestedFood.y;
+                            placeNewFood.value = Cell_FOOD;
+                            m_displayPort.send(std::make_unique<EventT<DisplayInd>>(placeNewFood));
                         }
-                    }
-
-                    if (requestedFoodCollidedWithSnake) {
-                        m_foodPort.send(std::make_unique<EventT<FoodReq>>());
-                    } else {
-                        DisplayInd placeNewFood;
-                        placeNewFood.x = requestedFood.x;
-                        placeNewFood.y = requestedFood.y;
-                        placeNewFood.value = Cell_FOOD;
-                        m_displayPort.send(std::make_unique<EventT<DisplayInd>>(placeNewFood));
+                        }
                     }
 
                     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
